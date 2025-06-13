@@ -13,13 +13,15 @@ export default async function handler(req, res) {
         'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
       },
       body: JSON.stringify({
-        model: 'gpt-3.5-turbo',
+        model: 'gpt-3.5-turbo-1106',
         messages: [{ role: 'user', content: message }]
       })
     });
 
     const data = await response.json();
-    const reply = data.choices?.[0]?.message?.content || 'Desculpe, não entendi.';
+    const reply = data.choices && data.choices[0] && data.choices[0].message
+      ? data.choices[0].message.content.trim()
+      : 'A IA não respondeu nada.';
 
     res.status(200).json({ reply });
   } catch (error) {
