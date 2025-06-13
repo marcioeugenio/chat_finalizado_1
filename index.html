@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Camila 💬</title>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <style>
     body {
       background-color: #e8f5e9;
@@ -120,7 +121,6 @@
       userDiv.textContent = userMessage;
       messages.appendChild(userDiv);
       input.value = '';
-
       messages.scrollTop = messages.scrollHeight;
 
       try {
@@ -135,7 +135,7 @@
 
         const botDiv = document.createElement('div');
         botDiv.className = 'message bot';
-        botDiv.innerHTML = reply; // permite botão
+        botDiv.innerHTML = marked.parse(reply); // <-- renderiza Markdown com botão
         messages.appendChild(botDiv);
       } catch (err) {
         const errorDiv = document.createElement('div');
