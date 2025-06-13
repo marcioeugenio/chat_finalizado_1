@@ -111,6 +111,26 @@
     const input = document.getElementById('user-input');
     const messages = document.getElementById('messages');
 
+    // Verifica automaticamente se o pagamento foi feito
+    window.addEventListener('load', async () => {
+      const plano = sessionStorage.getItem('planoEscolhido');
+      if (plano === 'sensual') {
+        try {
+          const resp = await fetch('/api/verificar');
+          const data = await resp.json();
+          if (data.liberado) {
+            const botDiv = document.createElement('div');
+            botDiv.className = 'message bot';
+            botDiv.innerHTML = marked.parse("Pagamento confirmado 💗 Aqui está sua prévia especial:\n\n![Prévia](https://i.imgur.com/YOUR_IMAGE_ID.jpg)");
+            messages.appendChild(botDiv);
+          }
+        } catch (err) {
+          console.log('Erro ao verificar liberação automática.');
+        }
+      }
+    });
+
+    // Envia mensagem do chat
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       const userMessage = input.value.trim();
@@ -135,7 +155,7 @@
 
         const botDiv = document.createElement('div');
         botDiv.className = 'message bot';
-        botDiv.innerHTML = marked.parse(reply); // <-- renderiza Markdown com botão
+        botDiv.innerHTML = marked.parse(reply);
         messages.appendChild(botDiv);
       } catch (err) {
         const errorDiv = document.createElement('div');
@@ -146,6 +166,12 @@
 
       messages.scrollTop = messages.scrollHeight;
     });
+
+    // Salva a intenção de plano ao clicar
+    function pagarPlanoSensual() {
+      sessionStorage.setItem('planoEscolhido', 'sensual');
+      window.location.href = 'https://pag.ae/7_Kim2Cpu';
+    }
   </script>
 </body>
 </html>
