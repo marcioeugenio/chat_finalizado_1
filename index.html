@@ -78,6 +78,12 @@
       border-radius: 4px;
       cursor: pointer;
     }
+    .bot img {
+      margin-top: 8px;
+      max-width: 100%;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    }
   </style>
 </head>
 <body>
@@ -102,6 +108,34 @@
     const form = document.getElementById('chat-form');
     const input = document.getElementById('user-input');
     const messages = document.getElementById('messages');
+
+    // Verifica automaticamente o plano ao carregar
+    let planoLiberado = false;
+    let primeiraImagemMostrada = false;
+
+    async function verificarPlano() {
+      try {
+        const res = await fetch('/api/verificar');
+        const data = await res.json();
+        planoLiberado = data.liberado;
+
+        if (planoLiberado && !primeiraImagemMostrada) {
+          const botDiv = document.createElement('div');
+          botDiv.className = 'message bot';
+          botDiv.innerHTML = marked.parse(
+            "**Plano Sensual ativado com sucesso! 💗**\n\nAqui está a primeira prévia que preparei com carinho pra você:\n\n![Camila](/camila_planosensual/camila_sensual_1.jpg)"
+          );
+          messages.appendChild(botDiv);
+          messages.scrollTop = messages.scrollHeight;
+          primeiraImagemMostrada = true;
+        }
+      } catch (err) {
+        console.error("Erro ao verificar plano:", err);
+      }
+    }
+
+    // Verifica ao carregar a página
+    window.addEventListener('load', verificarPlano);
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -137,6 +171,11 @@
       }
 
       messages.scrollTop = messages.scrollHeight;
+
+      // Recheca após cada mensagem
+      if (!planoLiberado) {
+        await verificarPlano();
+      }
     });
   </script>
 </body>
