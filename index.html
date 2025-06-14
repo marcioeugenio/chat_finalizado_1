@@ -36,7 +36,6 @@
       height: 50px;
       border-radius: 50%;
       border: 2px solid white;
-      cursor: pointer;
     }
     .messages {
       min-height: 300px;
@@ -89,7 +88,7 @@
 <body>
   <div class="chat-container">
     <div class="header">
-      <img src="camila_perfil.jpg" alt="Camila" id="fotoCamila" />
+      <img src="camila_perfil.jpg" alt="Camila" />
       💬 Camila
       <small style="font-weight:normal">Online agora</small>
     </div>
@@ -109,9 +108,9 @@
     const input = document.getElementById('user-input');
     const messages = document.getElementById('messages');
 
-    // Verifica automaticamente o plano ao carregar
     let planoLiberado = false;
-    let primeiraImagemMostrada = false;
+    let fotoAtual = parseInt(sessionStorage.getItem('fotoAtual')) || 0;
+    let primeiraMostrada = sessionStorage.getItem('fotoMostrada') === 'true';
 
     async function verificarPlano() {
       try {
@@ -119,22 +118,32 @@
         const data = await res.json();
         planoLiberado = data.liberado;
 
-        if (planoLiberado && !primeiraImagemMostrada) {
-          const botDiv = document.createElement('div');
-          botDiv.className = 'message bot';
-          botDiv.innerHTML = marked.parse(
-            "**Plano Sensual ativado com sucesso! 💗**\n\nAqui está a primeira prévia que preparei com carinho pra você:\n\n![Camila](/camila_planosensual/camila_sensual_1.jpg)"
-          );
-          messages.appendChild(botDiv);
-          messages.scrollTop = messages.scrollHeight;
-          primeiraImagemMostrada = true;
+        if (planoLiberado && !primeiraMostrada) {
+          fotoAtual = 1;
+          mostrarImagem(fotoAtual);
+          sessionStorage.setItem('fotoMostrada', 'true');
+          sessionStorage.setItem('fotoAtual', '1');
         }
       } catch (err) {
         console.error("Erro ao verificar plano:", err);
       }
     }
 
-    // Verifica ao carregar a página
+    function mostrarImagem(numero) {
+      const botDiv = document.createElement('div');
+      botDiv.className = 'message bot';
+      botDiv.innerHTML = marked.parse(
+        `Aqui está algo especial pra você 💗\n\n![Foto](/camila_planosensual/camila_sensual_${numero}.jpg)`
+      );
+      messages.appendChild(botDiv);
+      messages.scrollTop = messages.scrollHeight;
+    }
+
+    function detectarPedidoImagem(texto) {
+      const termos = ["foto", "mais uma", "outra", "mais uma foto", "manda foto", "me mostra", "outra foto"];
+      return termos.some(t => texto.toLowerCase().includes(t));
+    }
+
     window.addEventListener('load', verificarPlano);
 
     form.addEventListener('submit', async (e) => {
@@ -163,6 +172,7 @@
         botDiv.className = 'message bot';
         botDiv.innerHTML = marked.parse(reply);
         messages.appendChild(botDiv);
+        messages.scrollTop = messages.scrollHeight;
       } catch (err) {
         const errorDiv = document.createElement('div');
         errorDiv.className = 'message bot';
@@ -170,11 +180,12 @@
         messages.appendChild(errorDiv);
       }
 
-      messages.scrollTop = messages.scrollHeight;
-
-      // Recheca após cada mensagem
-      if (!planoLiberado) {
-        await verificarPlano();
+      // Verificação de plano e liberação de imagem extra
+      if (planoLiberado && detectarPedidoImagem(userMessage)) {
+        fotoAtual++;
+        if (fotoAtual > 6) fotoAtual = 1;
+        sessionStorage.setItem('fotoAtual', fotoAtual.toString());
+        mostrarImagem(fotoAtual);
       }
     });
   </script>
