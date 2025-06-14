@@ -81,3 +81,63 @@
   </style>
 </head>
 <body>
+  <div class="chat-container">
+    <div class="header">
+      <img src="camila_perfil.jpg" alt="Camila" id="fotoCamila" />
+      💬 Camila
+      <small style="font-weight:normal">Online agora</small>
+    </div>
+
+    <div class="messages" id="messages">
+      <div class="message bot">Oi, eu sou a Camila. Como é seu nome? 😊</div>
+    </div>
+
+    <form id="chat-form">
+      <input type="text" id="user-input" placeholder="Digite sua mensagem..." autocomplete="off" required />
+      <button type="submit">Enviar</button>
+    </form>
+  </div>
+
+  <script>
+    const form = document.getElementById('chat-form');
+    const input = document.getElementById('user-input');
+    const messages = document.getElementById('messages');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const userMessage = input.value.trim();
+      if (!userMessage) return;
+
+      const userDiv = document.createElement('div');
+      userDiv.className = 'message user';
+      userDiv.textContent = userMessage;
+      messages.appendChild(userDiv);
+      input.value = '';
+      messages.scrollTop = messages.scrollHeight;
+
+      try {
+        const response = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: userMessage }),
+        });
+
+        const data = await response.json();
+        const reply = data.reply;
+
+        const botDiv = document.createElement('div');
+        botDiv.className = 'message bot';
+        botDiv.innerHTML = marked.parse(reply);
+        messages.appendChild(botDiv);
+      } catch (err) {
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'message bot';
+        errorDiv.textContent = 'Erro ao responder. Tente novamente mais tarde.';
+        messages.appendChild(errorDiv);
+      }
+
+      messages.scrollTop = messages.scrollHeight;
+    });
+  </script>
+</body>
+</html>
