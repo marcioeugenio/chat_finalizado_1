@@ -1,101 +1,163 @@
-<script>
-  const form = document.getElementById('chat-form');
-  const input = document.getElementById('user-input');
-  const messages = document.getElementById('messages');
-  const botaoSensual = document.getElementById('verSensual');
-
-  const imagensSensuais = [
-    '/camila_planosensual/01.png',
-    '/camila_planosensual/02.png',
-    '/camila_planosensual/03.png',
-    '/camila_planosensual/04.png',
-    '/camila_planosensual/05.png',
-    '/camila_planosensual/06.png'
-  ];
-  let imagemAtual = 0;
-
-  function enviarImagemSensual() {
-    if (imagemAtual < imagensSensuais.length) {
-      const img = document.createElement("img");
-      img.src = imagensSensuais[imagemAtual];
-      img.className = "img-sensual";
-      messages.appendChild(img);
-      imagemAtual++;
-    } else {
-      imagemAtual = 0;
-      const aviso = document.createElement("div");
-      aviso.className = "message bot";
-      aviso.innerHTML = "Essas foram as imagens disponíveis 💗 Se quiser mais, podemos viver algo mais intenso...";
-      messages.appendChild(aviso);
-    }
-    messages.scrollTop = messages.scrollHeight;
-  }
-
-  // Verifica automaticamente se o pagamento foi feito
-  window.addEventListener('load', async () => {
-    const plano = localStorage.getItem('planoEscolhido');
-    if (plano === 'sensual') {
-      try {
-        const resp = await fetch('/api/verificar');
-        const data = await resp.json();
-        if (data.liberado) {
-          const botDiv = document.createElement('div');
-          botDiv.className = 'message bot';
-          botDiv.innerHTML = marked.parse(
-            "Pagamento confirmado 💗 Aqui está sua prévia especial:\n\n![Prévia](/camila_planosensual/01.png)"
-          );
-          messages.appendChild(botDiv);
-          botaoSensual.style.display = 'block';
-        }
-      } catch (err) {
-        console.log('Erro ao verificar liberação automática.');
-      }
-    }
-  });
-
-  // Envio normal de mensagem para a IA
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const userMessage = input.value.trim();
-    if (!userMessage) return;
-
-    const userDiv = document.createElement('div');
-    userDiv.className = 'message user';
-    userDiv.textContent = userMessage;
-    messages.appendChild(userDiv);
-    input.value = '';
-    messages.scrollTop = messages.scrollHeight;
-
-    try {
-      const response = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: userMessage }),
-      });
-
-      const data = await response.json();
-      const reply = data.reply;
-
-      const botDiv = document.createElement('div');
-      botDiv.className = 'message bot';
-      botDiv.innerHTML = marked.parse(reply);
-      messages.appendChild(botDiv);
-    } catch (err) {
-      const errorDiv = document.createElement('div');
-      errorDiv.className = 'message bot';
-      errorDiv.textContent = 'Erro ao responder. Tente novamente mais tarde.';
-      messages.appendChild(errorDiv);
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Camila 💬</title>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <style>
+    body {
+      background-color: #e8f5e9;
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
     }
 
-    messages.scrollTop = messages.scrollHeight;
-  });
+    .chat-container {
+      max-width: 600px;
+      margin: 2rem auto;
+      background: white;
+      border-radius: 8px;
+      padding: 1rem;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
 
-  // Quando clicar no botão de pagamento
-  function pagarPlanoSensual() {
-    localStorage.setItem('planoEscolhido', 'sensual');
-    window.location.href = 'https://pag.ae/7_Khu-8M9';
-  }
+    .header {
+      background-color: #4caf50;
+      color: white;
+      padding: 1rem;
+      border-radius: 8px 8px 0 0;
+      font-size: 1.2rem;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
 
-  // Modal da foto da Camila
-  document.getElementById("fotoCamila").addEventListener("click", () => {
-    document.
+    .header img {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      border: 2px solid white;
+      cursor: pointer;
+    }
+
+    .messages {
+      min-height: 300px;
+      padding: 1rem;
+      overflow-y: auto;
+    }
+
+    .message {
+      margin-bottom: 1rem;
+    }
+
+    .user {
+      text-align: right;
+      color: #333;
+    }
+
+    .bot {
+      text-align: left;
+      background-color: #f1f8e9;
+      padding: 0.8rem;
+      border-radius: 8px;
+      display: inline-block;
+      max-width: 90%;
+    }
+
+    form {
+      display: flex;
+      gap: 0.5rem;
+      padding: 1rem;
+      border-top: 1px solid #ccc;
+    }
+
+    input[type="text"] {
+      flex-grow: 1;
+      padding: 0.5rem;
+      font-size: 1rem;
+    }
+
+    button {
+      padding: 0.5rem 1rem;
+      background-color: #4caf50;
+      border: none;
+      color: white;
+      font-weight: bold;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    #verSensual {
+      display: none;
+      margin: 0 auto 20px;
+      padding: 10px 20px;
+      background-color: #e91e63;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .img-sensual {
+      width: 200px;
+      margin: 10px auto;
+      display: block;
+      border-radius: 10px;
+      border: 2px solid #e91e63;
+    }
+
+    #modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.7);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    #modal img {
+      max-width: 90%;
+      max-height: 90%;
+      border-radius: 10px;
+      box-shadow: 0 0 20px black;
+    }
+  </style>
+</head>
+<body>
+  <div class="chat-container">
+    <div class="header">
+      <img src="camila_perfil.jpg" alt="Camila" id="fotoCamila" />
+      💬 Camila
+      <small style="font-weight:normal">Online agora</small>
+    </div>
+
+    <div class="messages" id="messages">
+      <div class="message bot">Oi, eu sou a Camila. Como é seu nome? 😊</div>
+    </div>
+
+    <button id="verSensual" onclick="enviarImagemSensual()">🔓 Ver imagem sensual</button>
+
+    <form id="chat-form">
+      <input type="text" id="user-input" placeholder="Digite sua mensagem..." autocomplete="off" required />
+      <button type="submit">Enviar</button>
+    </form>
+  </div>
+
+  <div id="modal" onclick="fecharModal()">
+    <img src="camila_perfil.jpg" alt="Camila grande" id="fotoAmpliada" />
+  </div>
+
+  <script>
+    const form = document.getElementById('chat-form');
+    const input = document.getElementById('user-input');
+    const messages = document.getElementById('messages');
+    const botaoSensual = document.getElementById('verSensual');
+
+    c
