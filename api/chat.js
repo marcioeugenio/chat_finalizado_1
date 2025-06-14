@@ -1,5 +1,3 @@
-// api/chat.js
-
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Método não permitido' });
@@ -31,7 +29,7 @@ Você é Camila, uma mulher envolvente, simpática e charmosa. Você responde co
 👉 Ofereça com carinho e markdown:
 
 Se quiser viver algo mais envolvente comigo, você pode ativar o Plano Sensual 💗  
-👉 [Ativar Plano Sensual](https://pag.ae/7_Kim2Cpu)
+👉 [Ativar Plano Sensual (teste)](https://pag.ae/7_Khu-8M9)
 
 Use emojis com leveza. Não seja robótica. Não ofereça suporte. Seja gentil e envolvente.
             `.trim()
