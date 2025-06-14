@@ -36,6 +36,7 @@
       height: 50px;
       border-radius: 50%;
       border: 2px solid white;
+      cursor: pointer;
     }
     .messages {
       min-height: 300px;
@@ -77,30 +78,57 @@
       border-radius: 4px;
       cursor: pointer;
     }
-    .bot img {
-      margin-top: 8px;
-      max-width: 100%;
+    .bot a {
+      display: inline-block;
+      margin-top: 0.5rem;
+      background: #e91e63;
+      color: white;
+      padding: 10px 16px;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    .bot a:hover {
+      background: #d81b60;
+    }
+    #modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.7);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    #modal img {
+      max-width: 90%;
+      max-height: 90%;
       border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+      box-shadow: 0 0 20px black;
     }
   </style>
 </head>
 <body>
   <div class="chat-container">
     <div class="header">
-      <img src="camila_perfil.jpg" alt="Camila" />
+      <img src="camila_perfil.jpg" alt="Camila" id="fotoCamila" />
       💬 Camila
       <small style="font-weight:normal">Online agora</small>
     </div>
-
     <div class="messages" id="messages">
       <div class="message bot">Oi, eu sou a Camila. Como é seu nome? 😊</div>
     </div>
-
     <form id="chat-form">
       <input type="text" id="user-input" placeholder="Digite sua mensagem..." autocomplete="off" required />
       <button type="submit">Enviar</button>
     </form>
+  </div>
+
+  <div id="modal" onclick="fecharModal()">
+    <img src="camila_perfil.jpg" alt="Camila grande" id="fotoAmpliada" />
   </div>
 
   <script>
@@ -108,43 +136,14 @@
     const input = document.getElementById('user-input');
     const messages = document.getElementById('messages');
 
-    let planoLiberado = false;
-    let fotoAtual = parseInt(sessionStorage.getItem('fotoAtual')) || 0;
-    let primeiraMostrada = sessionStorage.getItem('fotoMostrada') === 'true';
-
-    async function verificarPlano() {
-      try {
-        const res = await fetch('/api/verificar');
-        const data = await res.json();
-        planoLiberado = data.liberado;
-
-        if (planoLiberado && !primeiraMostrada) {
-          fotoAtual = 1;
-          mostrarImagem(fotoAtual);
-          sessionStorage.setItem('fotoMostrada', 'true');
-          sessionStorage.setItem('fotoAtual', '1');
-        }
-      } catch (err) {
-        console.error("Erro ao verificar plano:", err);
+    window.addEventListener('load', () => {
+      const plano = sessionStorage.getItem('planoEscolhido');
+      const liberado = sessionStorage.getItem('liberado');
+      if (plano === 'sensual' && !liberado) {
+        // simulação de liberação automática local (sem backend)
+        sessionStorage.setItem('liberado', 'true');
       }
-    }
-
-    function mostrarImagem(numero) {
-      const botDiv = document.createElement('div');
-      botDiv.className = 'message bot';
-      botDiv.innerHTML = marked.parse(
-        `Aqui está algo especial pra você 💗\n\n![Foto](/camila_planosensual/camila_sensual_${numero}.jpg)`
-      );
-      messages.appendChild(botDiv);
-      messages.scrollTop = messages.scrollHeight;
-    }
-
-    function detectarPedidoImagem(texto) {
-      const termos = ["foto", "mais uma", "outra", "mais uma foto", "manda foto", "me mostra", "outra foto"];
-      return termos.some(t => texto.toLowerCase().includes(t));
-    }
-
-    window.addEventListener('load', verificarPlano);
+    });
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -172,7 +171,6 @@
         botDiv.className = 'message bot';
         botDiv.innerHTML = marked.parse(reply);
         messages.appendChild(botDiv);
-        messages.scrollTop = messages.scrollHeight;
       } catch (err) {
         const errorDiv = document.createElement('div');
         errorDiv.className = 'message bot';
@@ -180,14 +178,21 @@
         messages.appendChild(errorDiv);
       }
 
-      // Verificação de plano e liberação de imagem extra
-      if (planoLiberado && detectarPedidoImagem(userMessage)) {
-        fotoAtual++;
-        if (fotoAtual > 6) fotoAtual = 1;
-        sessionStorage.setItem('fotoAtual', fotoAtual.toString());
-        mostrarImagem(fotoAtual);
-      }
+      messages.scrollTop = messages.scrollHeight;
     });
+
+    document.getElementById("fotoCamila").addEventListener("click", () => {
+      document.getElementById("modal").style.display = "flex";
+    });
+
+    function fecharModal() {
+      document.getElementById("modal").style.display = "none";
+    }
+
+    function pagarPlanoSensual() {
+      sessionStorage.setItem('planoEscolhido', 'sensual');
+      window.location.href = 'https://pag.ae/7_Khu-8M9';
+    }
   </script>
 </body>
 </html>
