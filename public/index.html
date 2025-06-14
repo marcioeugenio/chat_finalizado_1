@@ -66,6 +66,7 @@
   <script>
     let sensualLiberado = false;
     let fotosEnviadas = 0;
+    let digitandoDiv = null;
 
     async function enviarMensagem() {
       const input = document.getElementById("mensagem");
@@ -78,6 +79,13 @@
         sensualLiberado = true;
       }
 
+      // Mostra "Camila está digitando..."
+      digitandoDiv = document.createElement("div");
+      digitandoDiv.className = "message camila";
+      digitandoDiv.innerHTML = `<strong class="camila">Camila:</strong> <em>está digitando...</em>`;
+      document.getElementById("chat").appendChild(digitandoDiv);
+      document.getElementById("chat").scrollTop = document.getElementById("chat").scrollHeight;
+
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -85,7 +93,13 @@
       });
 
       const data = await response.json();
-      adicionarMensagem("Camila", data.reply || "Erro ao responder.", "camila");
+
+      // Espera 2 segundos antes de exibir a resposta real
+      setTimeout(() => {
+        if (digitandoDiv) digitandoDiv.remove();
+        adicionarMensagem("Camila", data.reply || "Erro ao responder.", "camila");
+        input.value = "";
+      }, 2000);
     }
 
     function adicionarMensagem(remetente, texto, classe) {
