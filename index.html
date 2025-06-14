@@ -3,196 +3,129 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Camila 💬</title>
-  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <title>Camila - Sua Acompanhante Virtual</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css" />
   <style>
     body {
-      background-color: #e8f5e9;
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
+      background-color: #eef8f1;
     }
-    .chat-container {
-      max-width: 600px;
-      margin: 2rem auto;
-      background: white;
-      border-radius: 8px;
-      padding: 1rem;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    }
-    .header {
-      background-color: #4caf50;
-      color: white;
-      padding: 1rem;
-      border-radius: 8px 8px 0 0;
-      font-size: 1.2rem;
-      font-weight: bold;
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-    }
-    .header img {
-      width: 50px;
-      height: 50px;
-      border-radius: 50%;
-      border: 2px solid white;
-      cursor: pointer;
-    }
-    .messages {
-      min-height: 300px;
-      padding: 1rem;
+    #chat {
+      max-height: 400px;
       overflow-y: auto;
-    }
-    .message {
+      border: 1px solid #ccc;
+      padding: 1rem;
       margin-bottom: 1rem;
+      background: #fff;
+      border-radius: 12px;
+    }
+    .camila {
+      color: #d63384;
     }
     .user {
-      text-align: right;
-      color: #333;
+      color: #0d6efd;
     }
-    .bot {
-      text-align: left;
-      background-color: #f1f8e9;
-      padding: 0.8rem;
-      border-radius: 8px;
-      display: inline-block;
-      max-width: 90%;
+    .message {
+      margin-bottom: 0.8rem;
     }
-    form {
-      display: flex;
-      gap: 0.5rem;
+    .profile-img {
+      width: 80px;
+      border-radius: 50%;
+      border: 2px solid #d63384;
+      margin-bottom: 1rem;
+    }
+    .topo {
+      background-color: #4CAF50;
+      color: white;
       padding: 1rem;
-      border-top: 1px solid #ccc;
+      border-radius: 12px;
+      margin-bottom: 1rem;
     }
-    input[type="text"] {
-      flex-grow: 1;
-      padding: 0.5rem;
-      font-size: 1rem;
-    }
-    button {
-      padding: 0.5rem 1rem;
-      background-color: #4caf50;
-      border: none;
-      color: white;
-      font-weight: bold;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-    .bot a {
-      display: inline-block;
-      margin-top: 0.5rem;
-      background: #e91e63;
-      color: white;
-      padding: 10px 16px;
-      border-radius: 6px;
-      text-decoration: none;
-      font-weight: bold;
-    }
-    .bot a:hover {
-      background: #d81b60;
-    }
-    #modal {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0,0,0,0.7);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-    }
-    #modal img {
-      max-width: 90%;
-      max-height: 90%;
-      border-radius: 10px;
-      box-shadow: 0 0 20px black;
+    .topo h2 {
+      margin: 0;
     }
   </style>
 </head>
 <body>
-  <div class="chat-container">
-    <div class="header">
-      <img src="camila_perfil.jpg" alt="Camila" id="fotoCamila" />
-      💬 Camila
-      <small style="font-weight:normal">Online agora</small>
+
+  <main class="container">
+    <div class="topo">
+      <img src="camila_perfil.jpg" class="profile-img" alt="Camila" />
+      <h2>💬 Camila <small>Online agora</small></h2>
     </div>
-    <div class="messages" id="messages">
-      <div class="message bot">Oi, eu sou a Camila. Como é seu nome? 😊</div>
+
+    <div id="chat">
+      <div class="message camila"><strong class="camila">Camila:</strong> Oi, eu sou a Camila. Como é seu nome? 😊</div>
     </div>
-    <form id="chat-form">
-      <input type="text" id="user-input" placeholder="Digite sua mensagem..." autocomplete="off" required />
+
+    <form>
+      <input type="text" id="mensagem" placeholder="Digite sua mensagem..." autocomplete="off" />
       <button type="submit">Enviar</button>
     </form>
-  </div>
-
-  <div id="modal" onclick="fecharModal()">
-    <img src="camila_perfil.jpg" alt="Camila grande" id="fotoAmpliada" />
-  </div>
+  </main>
 
   <script>
-    const form = document.getElementById('chat-form');
-    const input = document.getElementById('user-input');
-    const messages = document.getElementById('messages');
+    let sensualLiberado = false;
+    let fotosEnviadas = 0;
 
-    window.addEventListener('load', () => {
-      const plano = sessionStorage.getItem('planoEscolhido');
-      const liberado = sessionStorage.getItem('liberado');
-      if (plano === 'sensual' && !liberado) {
-        // simulação de liberação automática local (sem backend)
-        sessionStorage.setItem('liberado', 'true');
+    async function enviarMensagem() {
+      const input = document.getElementById("mensagem");
+      const texto = input.value.trim();
+      if (!texto) return;
+
+      adicionarMensagem("Você", texto, "user");
+
+      // Detecta se o cliente avisou que pagou
+      if (texto.toLowerCase().includes("paguei")) {
+        sensualLiberado = true;
+      }
+
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          message: texto,
+          sensualLiberado,
+          fotosEnviadas
+        })
+      });
+
+      const data = await response.json();
+      const resposta = data.reply || "Erro ao responder.";
+
+      if (typeof data.fotosEnviadas === "number") {
+        fotosEnviadas = data.fotosEnviadas;
+      }
+
+      adicionarMensagem("Camila", resposta, "camila");
+      input.value = "";
+    }
+
+    function adicionarMensagem(nome, texto, classe) {
+      const chat = document.getElementById("chat");
+      const div = document.createElement("div");
+      div.classList.add("message", classe);
+      div.innerHTML = `<strong class="${classe}">${nome}:</strong> ${converterMarkdown(texto)}`;
+      chat.appendChild(div);
+      chat.scrollTop = chat.scrollHeight;
+    }
+
+    function converterMarkdown(texto) {
+      // Converte ![desc](url) para imagem
+      return texto.replace(/!\[.*?\]\((.*?)\)/g, '<br><img src="$1" style="max-width:100%;border-radius:12px;margin-top:8px;">');
+    }
+
+    document.getElementById("mensagem").addEventListener("keydown", function(e) {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        enviarMensagem();
       }
     });
 
-    form.addEventListener('submit', async (e) => {
+    document.querySelector("form").addEventListener("submit", function(e) {
       e.preventDefault();
-      const userMessage = input.value.trim();
-      if (!userMessage) return;
-
-      const userDiv = document.createElement('div');
-      userDiv.className = 'message user';
-      userDiv.textContent = userMessage;
-      messages.appendChild(userDiv);
-      input.value = '';
-      messages.scrollTop = messages.scrollHeight;
-
-      try {
-        const response = await fetch('/api/chat', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message: userMessage }),
-        });
-
-        const data = await response.json();
-        const reply = data.reply;
-
-        const botDiv = document.createElement('div');
-        botDiv.className = 'message bot';
-        botDiv.innerHTML = marked.parse(reply);
-        messages.appendChild(botDiv);
-      } catch (err) {
-        const errorDiv = document.createElement('div');
-        errorDiv.className = 'message bot';
-        errorDiv.textContent = 'Erro ao responder. Tente novamente mais tarde.';
-        messages.appendChild(errorDiv);
-      }
-
-      messages.scrollTop = messages.scrollHeight;
+      enviarMensagem();
     });
-
-    document.getElementById("fotoCamila").addEventListener("click", () => {
-      document.getElementById("modal").style.display = "flex";
-    });
-
-    function fecharModal() {
-      document.getElementById("modal").style.display = "none";
-    }
-
-    function pagarPlanoSensual() {
-      sessionStorage.setItem('planoEscolhido', 'sensual');
-      window.location.href = 'https://pag.ae/7_Khu-8M9';
-    }
   </script>
+
 </body>
 </html>
