@@ -25,7 +25,9 @@ export default async function handler(req, res) {
 
   try {
     if (global.planoAtivo && message.toLowerCase().includes('foto')) {
-      return res.status(200).json({ reply: `Claro, querido 😘 Aqui está algo especial pra você:<br><img src="${proximaFoto}" style="max-width:100%;border-radius:10px;">` });
+      return res.status(200).json({
+        reply: `Claro, querido 😘 Aqui está algo especial pra você:<br><img src="${proximaFoto}" style="max-width:100%;border-radius:10px;">`
+      });
     }
 
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
@@ -49,8 +51,8 @@ export default async function handler(req, res) {
     const data = await response.json();
     const reply = data.choices?.[0]?.message?.content || "Desculpe, não consegui responder agora.";
     return res.status(200).json({ reply });
+
   } catch (error) {
-    console.error("Erro ao conectar com a IA:", error);
-    return res.status(500).json({ error: "Erro ao conectar com a IA" });
+    return res.status(500).json({ error: 'Erro interno do servidor' });
   }
 }
