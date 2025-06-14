@@ -39,6 +39,7 @@
       height: 50px;
       border-radius: 50%;
       border: 2px solid white;
+      cursor: pointer;
     }
 
     .messages {
@@ -102,12 +103,33 @@
     .bot a:hover {
       background: #d81b60;
     }
+
+    /* Estilo do modal da imagem ampliada */
+    #modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.7);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    #modal img {
+      max-width: 90%;
+      max-height: 90%;
+      border-radius: 10px;
+      box-shadow: 0 0 20px black;
+    }
   </style>
 </head>
 <body>
   <div class="chat-container">
     <div class="header">
-      <img src="camila_perfil.jpg" alt="Camila" />
+      <img src="camila_perfil.jpg" alt="Camila" id="fotoCamila" />
       💬 Camila
       <small style="font-weight:normal">Online agora</small>
     </div>
@@ -120,6 +142,11 @@
       <input type="text" id="user-input" placeholder="Digite sua mensagem..." autocomplete="off" required />
       <button type="submit">Enviar</button>
     </form>
+  </div>
+
+  <!-- Modal da imagem ampliada -->
+  <div id="modal" onclick="fecharModal()">
+    <img src="camila_perfil.jpg" alt="Camila grande" id="fotoAmpliada" />
   </div>
 
   <script>
@@ -185,7 +212,17 @@
       messages.scrollTop = messages.scrollHeight;
     });
 
-    // Salva a intenção de plano ao clicar
+    // Função para abrir o modal
+    document.getElementById("fotoCamila").addEventListener("click", () => {
+      document.getElementById("modal").style.display = "flex";
+    });
+
+    // Função para fechar o modal
+    function fecharModal() {
+      document.getElementById("modal").style.display = "none";
+    }
+
+    // Salva a intenção de plano ao clicar (caso use botão)
     function pagarPlanoSensual() {
       sessionStorage.setItem('planoEscolhido', 'sensual');
       window.location.href = 'https://pag.ae/7_Kim2Cpu';
