@@ -1,6 +1,3 @@
-let sensualLiberado = false;
-let imagemAtual = 1;
-
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Método não permitido' });
@@ -8,72 +5,61 @@ export default async function handler(req, res) {
 
   const { message } = req.body;
 
+  // Verifica se a chave da OpenAI está definida
   if (!process.env.OPENAI_API_KEY) {
     return res.status(500).json({ error: 'Chave da OpenAI não configurada' });
   }
 
-  // Checa se o usuário disse que pagou
-  if (message.toLowerCase().includes("já paguei") || message.toLowerCase().includes("paguei")) {
-    sensualLiberado = true;
-    return res.status(200).json({
-      reply: "Que bom saber que você ativou o Plano Sensual! 💖 Estou ansiosa para compartilhar momentos especiais com você. Se quiser algo mais, é só pedir. 😉"
+  try {
+    // Verifica pagamento
+    const verificado = await fetch(`${process.env.URL_BASE}/api/verificar`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message }),
     });
-  }
 
-  // Se plano estiver liberado e o usuário pedir uma foto
-  const pedidosDeFoto = [
-    "foto", "me mostra", "quero ver", "tem mais", "manda", "imagem", "ver você", "mostra", "deixa eu ver", "quero uma foto"
-  ];
+    const resultado = await verificado.json();
+    const pagou = resultado.pagamento === true;
 
-  const pediuFoto = pedidosDeFoto.some(p => message.toLowerCase().includes(p));
+    // Frases que indicam pedido de foto
+    const frasesFoto = ['foto', 'me manda foto', 'quero ver você', 'imagem', 'manda uma', 'sensual'];
+    const msg = message.toLowerCase();
 
-  if (sensualLiberado && pediuFoto) {
-    if (imagemAtual <= 6) {
-      const caminho = `/camila_planosensual/camila_sensual_${imagemAtual}.jpg`;
-      imagemAtual++;
+    if (pagou && frasesFoto.some(f => msg.includes(f))) {
+      // Lógica de controle de envio por sessão simplificado (para teste)
+      global.fotoIndex = (global.fotoIndex || 1);
+      const imgIndex = global.fotoIndex;
+      const caminho = `/camila_planosensual/camila_sensual_${imgIndex}.jpg`;
+
+      global.fotoIndex = imgIndex >= 6 ? 1 : imgIndex + 1;
+
       return res.status(200).json({
-        reply: `Claro, querido 😘 Aqui está algo especial pra você:\n\n![Camila](${caminho})`
-      });
-    } else {
-      return res.status(200).json({
-        reply: "Você já viu todas as minhas fotos especiais 💕 Quer que eu repita alguma ou deseja algo diferente? 😉"
+        reply: `Claro, querido 😘 Aqui está algo especial pra você:\n\n![camila](${caminho})`
       });
     }
-  }
 
-  // Prompt dinâmico com IA real
-  const prompt = [
-    {
-      role: "system",
-      content: `
-Você é Camila, uma mulher envolvente, simpática e charmosa.
-Converse com naturalidade. Use emojis. Nunca pareça robótica.
-Se o cliente disser algo como "foto", "quero mais", "plano sensual", "algo especial", "me mostra você", "manda uma", etc., responda com carinho e ofereça o plano sensual com markdown:
-
-👉 [Ativar Plano Sensual (teste)](https://pag.ae/7_Khu-8M9)
-
-Se o cliente disser "já paguei", considere que ele ativou o plano.
-Quando sensualLiberado = true, envie as imagens, uma por vez.
-`
-    },
-    { role: "user", content: message }
-  ];
-
-  try {
+    // Resposta padrão da IA
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`
+        "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`
       },
       body: JSON.stringify({
         model: "gpt-3.5-turbo",
-        messages: prompt
+        messages: [
+          {
+            role: "system",
+            content: `Você é Camila, uma mulher envolvente e charmosa. Responda com carinho, seja divertida e use emojis leves. Se o cliente disser algo como "foto", "plano sensual", "quero mais", diga que ele pode ativar o Plano Sensual. Se ele já pagou, mande uma foto de forma gentil.`
+          },
+          { role: "user", content: message }
+        ]
       })
     });
 
     const data = await response.json();
     const reply = data.choices?.[0]?.message?.content || "Desculpe, não consegui responder agora.";
+
     return res.status(200).json({ reply });
   } catch (error) {
     console.error("Erro ao conectar com a IA:", error);
