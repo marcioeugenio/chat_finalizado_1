@@ -29,6 +29,16 @@
       border-radius: 8px 8px 0 0;
       font-size: 1.2rem;
       font-weight: bold;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .header img {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      border: 2px solid white;
     }
 
     .messages {
@@ -96,10 +106,16 @@
 </head>
 <body>
   <div class="chat-container">
-    <div class="header">💬 Camila<br /><small style="font-weight:normal">Online agora</small></div>
+    <div class="header">
+      <img src="camila_perfil.jpg" alt="Camila" />
+      💬 Camila
+      <small style="font-weight:normal">Online agora</small>
+    </div>
+
     <div class="messages" id="messages">
       <div class="message bot">Oi, eu sou a Camila. Como é seu nome? 😊</div>
     </div>
+
     <form id="chat-form">
       <input type="text" id="user-input" placeholder="Digite sua mensagem..." autocomplete="off" required />
       <button type="submit">Enviar</button>
@@ -121,7 +137,9 @@
           if (data.liberado) {
             const botDiv = document.createElement('div');
             botDiv.className = 'message bot';
-            botDiv.innerHTML = marked.parse("Pagamento confirmado 💗 Aqui está sua prévia especial:\n\n![Prévia](https://i.imgur.com/YOUR_IMAGE_ID.jpg)");
+            botDiv.innerHTML = marked.parse(
+              "Pagamento confirmado 💗 Aqui está sua prévia especial:\n\n![Prévia](/camila_planosensual/camila_sensual_1.jpg)"
+            );
             messages.appendChild(botDiv);
           }
         } catch (err) {
