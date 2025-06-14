@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Camila - Sua Acompanhante Virtual</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css" />
+  <style>
+    body {
+      background-color: #eef8f1;
+    }
+    #chat {
+      max-height: 400px;
+      overflow-y: auto;
+      border: 1px solid #ccc;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      background: #fff;
+      border-radius: 12px;
+    }
+    .camila {
+      color: #d63384;
+    }
+    .user {
+      color: #0d6efd;
+    }
+    .message {
+      margin-bottom: 0.8rem;
+    }
+    .profile-img {
+      width: 80px;
+      border-radius: 50%;
+      border: 2px solid #d63384;
+      margin-bottom: 1rem;
+    }
+    .topo {
+      background-color: #4CAF50;
+      color: white;
+      padding: 1rem;
+      border-radius: 12px;
+      margin-bottom: 1rem;
+    }
+    .topo h2 {
+      margin: 0;
+    }
+  </style>
+</head>
+<body>
+
+  <main class="container">
+    <div class="topo">
+      <img src="camila_perfil.jpg" class="profile-img" alt="Camila" />
+      <h2>💬 Camila <small>Online agora</small></h2>
+    </div>
+
+    <div id="chat">
+      <div class="message camila"><strong class="camila">Camila:</strong> Oi, eu sou a Camila. Como é seu nome? 😊</div>
+    </div>
+
+    <form>
+      <input type="text" id="mensagem" placeholder="Digite sua mensagem..." autocomplete="off" />
+      <button type="submit">Enviar</button>
+    </form>
+  </main>
+
+  <script>
+    let sensualLiberado = false;
+    let fotosEnviadas = 0;
+
+    async function enviarMensagem() {
+      const input = document.getElementById("mensagem");
+      const texto = input.value.trim();
+      if (!texto) return;
+
+      adicionarMensagem("Você", texto, "user");
+
+      if (texto.toLowerCase().includes("paguei")) {
+        sensualLiberado = true;
+      }
+
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: texto })
+      });
+
+      const data = await response.json();
+      adicionarMensagem("Camila", data.reply || "Erro ao responder.", "camila");
+    }
+
+    function adicionarMensagem(remetente, texto, classe) {
+      const chat = document.getElementById("chat");
+      const div = document.createElement("div");
+      div.className = `message ${classe}`;
+      div.innerHTML = `<strong class="${classe}">${remetente}:</strong> ${converterMarkdown(texto)}`;
+      chat.appendChild(div);
+      chat.scrollTop = chat.scrollHeight;
+    }
+
+    function converterMarkdown(texto) {
+      return texto.replace(/!\[.*?\]\((.*?)\)/g, '<br><img src="$1" style="max-width:100%;border-radius:12px;margin-top:8px;">');
+    }
+
+    document.getElementById("mensagem").addEventListener("keydown", function(e) {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        enviarMensagem();
+      }
+    });
+
+    document.querySelector("form").addEventListener("submit", function(e) {
+      e.preventDefault();
+      enviarMensagem();
+    });
+  </script>
+
+</body>
+</html>
